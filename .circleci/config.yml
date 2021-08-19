@@ -19,7 +19,7 @@ jobs:
             npm install --save-dev @angular-devkit/build-angular
             npm install @angular/compiler-cli
             npm install @angular/compiler
-            npm update
+            npm link
 
       - run:
           name: build angular
