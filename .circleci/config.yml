@@ -3,7 +3,7 @@ version: 2.1
 # Holm Hinrichs
 defaults: &nodeEnv
   docker:
-    - image: --save-dev
+    - image: circleci/node:8-browsers
 
 # Commands for rollback needed
 
