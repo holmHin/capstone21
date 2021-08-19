@@ -13,6 +13,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: prepare environment
+          command: npm install --save-dev @angular-devkit/build-angular
+      - run:
           name: build angular
           command: |
             cd capstone
