@@ -23,6 +23,38 @@ jobs:
             cd capstone
             ng build
 
+  test-app:
+    <<: *nodeEnv
+    steps:
+      - checkout
+      - run:
+          name: prepare environment
+          command: |
+            npm install -g @angular/cli
+
+      - run:
+          name: build angular
+          command: |
+            cd capstone
+            ng test
+
+  lint-app:
+    <<: *nodeEnv
+    steps:
+      - checkout
+      - run:
+          name: prepare environment
+          command: |
+            npm install -g @angular/cli
+
+      - run:
+          name: build angular
+          command: |
+            cd capstone
+            ng lint
+
+
+
 
 
 # Orchestrate or schedule a set of jobs
@@ -30,5 +62,10 @@ workflows:
   capstone:
     jobs:
       - build-app
+      - test-app:
+          requires: [build-app]
+      - lint-app:
+          requires: [test-app]
+
 
 
