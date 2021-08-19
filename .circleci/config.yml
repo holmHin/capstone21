@@ -15,9 +15,7 @@ jobs:
       - run:
           name: prepare environment
           command: |
-            export NG_CLI_ANALYTICS="false"
-            echo $NG_CLI_ANALYTICS
-            sudo npm install -g @angular/cli
+            sudo npm install -g @angular/cli  > /dev/null
 
       - run:
           name: build angular
@@ -32,8 +30,7 @@ jobs:
       - run:
           name: prepare environment
           command: |
-            export NG_CLI_ANALYTICS="false"
-            sudo npm install -g @angular/cli
+            sudo npm install -g @angular/cli  > /dev/null
 
       - run:
           name: build angular
@@ -48,8 +45,7 @@ jobs:
       - run:
           name: prepare environment
           command: |
-            export NG_CLI_ANALYTICS="false"
-            sudo npm install -g @angular/cli
+            sudo npm install -g @angular/cli  > /dev/null
 
       - run:
           name: build angular
