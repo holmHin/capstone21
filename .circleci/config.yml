@@ -15,7 +15,7 @@ jobs:
       - run:
           name: prepare environment
           command: |
-            npm install -g @angular/cli
+            npm install @angular/cli
 
       - run:
           name: build angular
@@ -30,7 +30,7 @@ jobs:
       - run:
           name: prepare environment
           command: |
-            npm install -g @angular/cli
+            npm install @angular/cli
 
       - run:
           name: build angular
@@ -45,7 +45,7 @@ jobs:
       - run:
           name: prepare environment
           command: |
-            npm install -g @angular/cli
+            npm install @angular/cli
 
       - run:
           name: build angular
