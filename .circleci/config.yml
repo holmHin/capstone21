@@ -14,7 +14,9 @@ jobs:
       - checkout
       - run:
           name: prepare environment
-          command: npm install --save-dev @angular-devkit/build-angular
+          command: |
+          npm install --save-dev @angular-devkit/build-angular
+          npm install @angular/compiler-cli
       - run:
           name: build angular
           command: |
