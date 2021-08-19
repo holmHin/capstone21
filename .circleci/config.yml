@@ -3,7 +3,7 @@ version: 2.1
 # Holm Hinrichs
 defaults: &nodeEnv
   docker:
-    - image: angular/ngcontainer
+    - image: pivotalpa/angular-cli
 
 # Commands for rollback needed
 
