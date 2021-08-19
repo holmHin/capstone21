@@ -17,6 +17,8 @@ jobs:
           command: |
             sudo npm install -g @angular/cli  > /dev/null
             npm install --save-dev @angular-devkit/build-angular
+            npm install @angular/compiler-cli
+            npm update
 
       - run:
           name: build angular
@@ -33,6 +35,7 @@ jobs:
           command: |
             sudo npm install -g @angular/cli  > /dev/null
             npm install --save-dev @angular-devkit/build-angular
+            npm update
 
       - run:
           name: build angular
@@ -49,6 +52,7 @@ jobs:
           command: |
             sudo npm install -g @angular/cli  > /dev/null
             npm install --save-dev @angular-devkit/build-angular
+            npm update
 
       - run:
           name: build angular
