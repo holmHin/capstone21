@@ -28,7 +28,7 @@ jobs:
           command: |
             cd capstone
             sudo npm link
-            ng build
+            ng build > /dev/null
 
   test-app:
     <<: *nodeEnv
