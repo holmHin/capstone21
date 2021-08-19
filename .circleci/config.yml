@@ -18,6 +18,7 @@ jobs:
             sudo npm install -g @angular/cli@latest  > /dev/null
             npm install --save-dev @angular-devkit/build-angular
             npm install @angular/compiler-cli
+            npm install @angular/compiler
             npm update
 
       - run:
