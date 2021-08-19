@@ -15,7 +15,7 @@ jobs:
       - run:
           name: prepare environment
           command: |
-            export NG_CLI_ANALYTICS=ci
+            export NG_CLI_ANALYTICS="false"
             sudo npm install -g @angular/cli
 
       - run:
@@ -31,7 +31,7 @@ jobs:
       - run:
           name: prepare environment
           command: |
-            export NG_CLI_ANALYTICS=ci
+            export NG_CLI_ANALYTICS="false"
             sudo npm install -g @angular/cli
 
       - run:
@@ -47,7 +47,7 @@ jobs:
       - run:
           name: prepare environment
           command: |
-            export NG_CLI_ANALYTICS=ci
+            export NG_CLI_ANALYTICS="false"
             sudo npm install -g @angular/cli
 
       - run:
