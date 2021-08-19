@@ -19,13 +19,14 @@ jobs:
             npm install --save-dev @angular-devkit/build-angular
             npm install @angular/compiler-cli
             npm install @angular/compiler
-            sudo npm link
+
 
 
       - run:
           name: build angular
           command: |
             cd capstone
+            sudo npm link
             ng build
 
   test-app:
