@@ -3,7 +3,7 @@ version: 2.1
 # Holm Hinrichs
 defaults: &nodeEnv
   docker:
-    - image: trion/ng-cli
+    - image: --save-dev
 
 # Commands for rollback needed
 
@@ -15,8 +15,8 @@ jobs:
       - run:
           name: prepare environment
           command: |
-          npm install --save-dev @angular-devkit/build-angular
-          npm install --save-dev @angular/compiler-cli
+            npm install -g @angular/cli
+
       - run:
           name: build angular
           command: |
