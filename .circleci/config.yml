@@ -16,6 +16,7 @@ jobs:
           name: prepare environment
           command: |
             sudo npm install -g @angular/cli  > /dev/null
+            npm install --save-dev @angular-devkit/build-angular
 
       - run:
           name: build angular
@@ -31,6 +32,7 @@ jobs:
           name: prepare environment
           command: |
             sudo npm install -g @angular/cli  > /dev/null
+            npm install --save-dev @angular-devkit/build-angular
 
       - run:
           name: build angular
@@ -46,6 +48,7 @@ jobs:
           name: prepare environment
           command: |
             sudo npm install -g @angular/cli  > /dev/null
+            npm install --save-dev @angular-devkit/build-angular
 
       - run:
           name: build angular
