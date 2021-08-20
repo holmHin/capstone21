@@ -7,9 +7,9 @@ defaults: &nodeEnv
 
 # Commands for rollback needed
 commands:
-  prepare-angulare-cli:
+  prepare-angular-cli:
     steps:
-      - run: 
+      - run:
           name: install dependencies
           command: |
             sudo npm install -g @angular/cli@latest  > /dev/null
@@ -22,8 +22,7 @@ jobs:
   build-app:
     <<: *nodeEnv
     steps:
-      - checkout
-      - prepare-angulare-cli
+      - prepare-angular-cli
       - run:
           name: build angular
           command: |
@@ -35,21 +34,19 @@ jobs:
     <<: *nodeEnv
     steps:
       - checkout
-      - prepare-angulare-cli
-
+      - prepare-angular-cli
       - run:
           name: build angular
           command: |
             cd capstone
             sudo npm link > /dev/null
-            ng test
+            ng test --no-watch --no-progress --browsers=ChromeHeadlessCI
 
   lint-app:
     <<: *nodeEnv
     steps:
       - checkout
-      - prepare-angulare-cli
-
+      - prepare-angular-cli
       - run:
           name: build angular
           command: |
@@ -68,3 +65,6 @@ workflows:
       - build-app
       - test-app
       - lint-app
+
+
+
