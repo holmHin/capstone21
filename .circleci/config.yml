@@ -6,14 +6,11 @@ defaults: &nodeEnv
     - image: circleci/node:14-browsers
 
 # Commands for rollback needed
-
-jobs:
-  build-app:
-    <<: *nodeEnv
+commands:
+  prepare-angular-cli:
     steps:
-      - checkout
       - run:
-          name: prepare environment
+          name: install dependencies
           command: |
             sudo npm install -g @angular/cli@latest  > /dev/null
             npm install --save-dev @angular-devkit/build-angular
@@ -21,8 +18,11 @@ jobs:
             npm install @angular/compiler
             ng analytics off
 
-
-
+jobs:
+  build-app:
+    <<: *nodeEnv
+    steps:
+      - prepare-angular-cli
       - run:
           name: build angular
           command: |
@@ -34,34 +34,24 @@ jobs:
     <<: *nodeEnv
     steps:
       - checkout
-      - run:
-          name: prepare environment
-          command: |
-            sudo npm install -g @angular/cli  > /dev/null
-            npm install --save-dev @angular-devkit/build-angular
-            npm update
-
+      - prepare-angular-cli
       - run:
           name: build angular
           command: |
             cd capstone
-            ng test
+            sudo npm link > /dev/null
+            ng test --no-watch --no-progress --browsers=ChromeHeadlessCI
 
   lint-app:
     <<: *nodeEnv
     steps:
       - checkout
-      - run:
-          name: prepare environment
-          command: |
-            sudo npm install -g @angular/cli  > /dev/null
-            npm install --save-dev @angular-devkit/build-angular
-            npm update
-
+      - prepare-angular-cli
       - run:
           name: build angular
           command: |
             cd capstone
+            sudo npm link > /dev/null
             ng lint
 
 
@@ -73,10 +63,8 @@ workflows:
   capstone:
     jobs:
       - build-app
-      - test-app:
-          requires: [build-app]
-      - lint-app:
-          requires: [test-app]
+      - test-app
+      - lint-app
 
 
 
