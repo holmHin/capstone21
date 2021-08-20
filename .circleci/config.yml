@@ -36,17 +36,12 @@ jobs:
     steps:
       - checkout
       - prepare-angulare-cli
-      - run:
-          name: prepare environment
-          command: |
-            sudo npm install -g @angular/cli  > /dev/null
-            npm install --save-dev @angular-devkit/build-angular
-            npm update
 
       - run:
           name: build angular
           command: |
             cd capstone
+            sudo npm link > /dev/null
             ng test
 
   lint-app:
@@ -54,17 +49,12 @@ jobs:
     steps:
       - checkout
       - prepare-angulare-cli
-      - run:
-          name: prepare environment
-          command: |
-            sudo npm install -g @angular/cli  > /dev/null
-            npm install --save-dev @angular-devkit/build-angular
-            npm update
 
       - run:
           name: build angular
           command: |
             cd capstone
+            sudo npm link > /dev/null
             ng lint
 
 
@@ -76,10 +66,5 @@ workflows:
   capstone:
     jobs:
       - build-app
-      - test-app:
-          requires: [build-app]
-      - lint-app:
-          requires: [test-app]
-
-
-
+      - test-app
+      - lint-app
