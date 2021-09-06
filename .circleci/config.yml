@@ -56,8 +56,7 @@ jobs:
             ng lint
 
   push-docker:
-    docker:
-      <<: *nodeEnv
+    <<: *nodeEnv
     steps:
       - checkout
       - run:
