@@ -22,6 +22,7 @@ jobs:
   build-app:
     <<: *nodeEnv
     steps:
+      - checkout
       - prepare-angular-cli
       - run:
           name: build angular
@@ -54,6 +55,23 @@ jobs:
             sudo npm link > /dev/null
             ng lint
 
+  push-docker:
+    docker:
+      <<: *nodeEnv
+    steps:
+      - checkout
+      - run:
+          name: build app
+          command: |
+            cd capstone
+            sudo npm link > /dev/null
+            ng build
+      - run:
+          name: create Image
+          command: |
+            cp Docker/Dockerfile capstone/dist/capstone
+            cd capstone/dist/capstone
+            docker build . -t capstone21:latest
 
 
 
@@ -65,6 +83,7 @@ workflows:
       - build-app
       - test-app
       - lint-app
-
+      - push-docker:
+          requires: [build-app, test-app, lint-app]
 
 
