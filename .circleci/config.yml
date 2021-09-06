@@ -18,6 +18,16 @@ commands:
             npm install @angular/compiler
             ng analytics off
 
+
+  prepare-aws:
+    steps:
+      - run:
+          name: install aws cli
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+
 jobs:
   build-app:
     <<: *nodeEnv
@@ -60,6 +70,7 @@ jobs:
     steps:
       - checkout
       - prepare-angular-cli
+      - prepare-aws
       - run:
           name: build app
           command: |
@@ -75,6 +86,13 @@ jobs:
             cp Docker/Dockerfile capstone/dist/capstone
             cd capstone/dist/capstone
             docker build . -t capstone21:latest
+      - run:
+          name: push to ecr
+          command: |
+            aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 188794860952.dkr.ecr.eu-central-1.amazonaws.com
+            docker tag capstone21:latest 188794860952.dkr.ecr.eu-central-1.amazonaws.com/capstone:latest
+            docker push 188794860952.dkr.ecr.eu-central-1.amazonaws.com/capstone:latest
+
 
 
 
