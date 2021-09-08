@@ -8,6 +8,7 @@ Parameters:
     Type: String
     Default: 10.0.0.0/16
 
+#VPC
 Resources:
   capstone21VPC:
     Type: AWS::EC2::VPC
@@ -17,6 +18,23 @@ Resources:
         - Key: EnvironmentName
           Value: !Ref EnvironmentName
 
+  ## InternetGateWay
+  capstone21IGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: EaSimpleStack/pontonEA Cluster
+          
+  capstone21VPCAttac:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: capstone21VPC
+      InternetGatewayId:
+        Ref: capstone21IGW
+
+  ## Private Subnet Block
   capstone21privateSubnet:
     Type: AWS::EC2::Subnet
     Properties:
@@ -31,8 +49,10 @@ Resources:
         - Key: Name
           Value: PrivateSubnet
         - Key: EnvironmentName
-          Value: !Ref EnvironmentName        
-   
+          Value: !Ref EnvironmentName
+        - Key: kubernetes.io/role/elb
+          Value: "1"
+
   capstone21privateSubnetRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -41,79 +61,30 @@ Resources:
       Tags:
         - Key: Name
           Value: privateSubnetSubnet1RouteTable
-  capstone21privateSubnetSubnet1RouteTableAssociationF1789C9F:
+        - Key: EnvironmentName
+          Value: !Ref EnvironmentName
+        - Key: kubernetes.io/role/elb
+          Value: "1"
+
+  capstone21privateSubnetRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId:
-        Ref: capstone21privateSubnetSubnet1RouteTableBAE9333A
+        Ref: capstone21privateSubnetRouteTable
       SubnetId:
-        Ref: capstone21privateSubnetSubnet1SubnetF89F399A
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/privateSubnetSubnet1/RouteTableAssociation
-  capstone21privateSubnetSubnet1DefaultRoute06A81048:
+        Ref: capstone21privateSubnet
+
+  capstone21privateSubnetDefaultRoute:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId:
-        Ref: capstone21privateSubnetSubnet1RouteTableBAE9333A
+        Ref: capstone21privateSubnetRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: capstone21publicSubnetSubnet1NATGatewayFDB77AB9
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/privateSubnetSubnet1/DefaultRoute
-  capstone21privateSubnetSubnet2SubnetD2D879FA:
-    Type: AWS::EC2::Subnet
-    Properties:
-      CidrBlock: 10.0.0.64/26
-      VpcId:
-        Ref: capstone21VPC
-      AvailabilityZone:
-        Fn::Select:
-          - 1
-          - Fn::GetAZs: ""
-      MapPublicIpOnLaunch: false
-      Tags:
-        - Key: aws-cdk:subnet-name
-          Value: privateSubnet
-        - Key: aws-cdk:subnet-type
-          Value: Private
-        - Key: kubernetes.io/role/internal-elb
-          Value: "1"
-        - Key: Name
-          Value: EaSimpleStack/pontonEA Cluster/privateSubnetSubnet2
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/privateSubnetSubnet2/Subnet
-  capstone21privateSubnetSubnet2RouteTableF4D2F54B:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId:
-        Ref: capstone21VPC
-      Tags:
-        - Key: kubernetes.io/role/internal-elb
-          Value: "1"
-        - Key: Name
-          Value: EaSimpleStack/pontonEA Cluster/privateSubnetSubnet2
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/privateSubnetSubnet2/RouteTable
-  capstone21privateSubnetSubnet2RouteTableAssociation57EABD42:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId:
-        Ref: capstone21privateSubnetSubnet2RouteTableF4D2F54B
-      SubnetId:
-        Ref: capstone21privateSubnetSubnet2SubnetD2D879FA
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/privateSubnetSubnet2/RouteTableAssociation
-  capstone21privateSubnetSubnet2DefaultRouteB589715E:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId:
-        Ref: capstone21privateSubnetSubnet2RouteTableF4D2F54B
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId:
-        Ref: capstone21publicSubnetSubnet1NATGatewayFDB77AB9
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/privateSubnetSubnet2/DefaultRoute
-  capstone21publicSubnetSubnet1SubnetE9EC16D5:
+        Ref: capstone21publicSubnetNATGateway
+
+  ## Public Subnet Block
+  capstone21publicSubnet:
     Type: AWS::EC2::Subnet
     Properties:
       CidrBlock: 10.0.0.128/26
@@ -125,17 +96,12 @@ Resources:
           - Fn::GetAZs: ""
       MapPublicIpOnLaunch: true
       Tags:
-        - Key: aws-cdk:subnet-name
-          Value: publicSubnet
-        - Key: aws-cdk:subnet-type
-          Value: Public
+        - Key: Name
+          Value: publicSubnetSubnet
         - Key: kubernetes.io/role/elb
           Value: "1"
-        - Key: Name
-          Value: EaSimpleStack/pontonEA Cluster/publicSubnetSubnet1
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/publicSubnetSubnet1/Subnet
-  capstone21publicSubnetSubnet1RouteTable825BE106:
+
+  capstone21publicSubnetRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId:
@@ -143,170 +109,54 @@ Resources:
       Tags:
         - Key: kubernetes.io/role/elb
           Value: "1"
-        - Key: Name
-          Value: EaSimpleStack/pontonEA Cluster/publicSubnetSubnet1
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/publicSubnetSubnet1/RouteTable
-  capstone21publicSubnetSubnet1RouteTableAssociation797A96E9:
+
+  capstone21publicSubnetRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId:
-        Ref: capstone21publicSubnetSubnet1RouteTable825BE106
+        Ref: capstone21publicSubnetRouteTable
       SubnetId:
-        Ref: capstone21publicSubnetSubnet1SubnetE9EC16D5
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/publicSubnetSubnet1/RouteTableAssociation
-  capstone21publicSubnetSubnet1DefaultRoute0C8553CA:
+        Ref: capstone21publicSubnet
+
+  capstone21publicSubnetDefaultRoute:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId:
-        Ref: capstone21publicSubnetSubnet1RouteTable825BE106
+        Ref: capstone21publicSubnetRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId:
-        Ref: capstone21IGWA3B2A0DA
+        Ref: capstone21IGW
     DependsOn:
-      - capstone21VPCGWDA14A4BF
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/publicSubnetSubnet1/DefaultRoute
-  capstone21publicSubnetSubnet1EIPCF5DEADD:
+      - capstone21VPCAttac
+
+## Elastic IP
+  EIP1:
     Type: AWS::EC2::EIP
+    DependsOn: InternetVPCGatewayAttac
     Properties:
       Domain: vpc
       Tags:
-        - Key: kubernetes.io/role/elb
-          Value: "1"
-        - Key: Name
-          Value: EaSimpleStack/pontonEA Cluster/publicSubnetSubnet1
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/publicSubnetSubnet1/EIP
-  capstone21publicSubnetSubnet1NATGatewayFDB77AB9:
+        - Key: EnvironmentName
+          Value: !Ref EnvironmentName
+
+
+## NAT Gateway
+  capstone21publicSubnetNATGateway:
     Type: AWS::EC2::NatGateway
     Properties:
       SubnetId:
-        Ref: capstone21publicSubnetSubnet1SubnetE9EC16D5
+        Ref: capstone21publicSubnet
       AllocationId:
-        Fn::GetAtt:
-          - capstone21publicSubnetSubnet1EIPCF5DEADD
-          - AllocationId
+        Ref: EIP1.AllocationId
       Tags:
         - Key: kubernetes.io/role/elb
           Value: "1"
-        - Key: Name
-          Value: EaSimpleStack/pontonEA Cluster/publicSubnetSubnet1
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/publicSubnetSubnet1/NATGateway
-  capstone21publicSubnetSubnet2Subnet852C8FDE:
-    Type: AWS::EC2::Subnet
-    Properties:
-      CidrBlock: 10.0.0.192/26
-      VpcId:
-        Ref: capstone21VPC
-      AvailabilityZone:
-        Fn::Select:
-          - 1
-          - Fn::GetAZs: ""
-      MapPublicIpOnLaunch: true
-      Tags:
-        - Key: aws-cdk:subnet-name
-          Value: publicSubnet
-        - Key: aws-cdk:subnet-type
-          Value: Public
-        - Key: kubernetes.io/role/elb
-          Value: "1"
-        - Key: Name
-          Value: EaSimpleStack/pontonEA Cluster/publicSubnetSubnet2
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/publicSubnetSubnet2/Subnet
-  capstone21publicSubnetSubnet2RouteTable904EC921:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId:
-        Ref: capstone21VPC
-      Tags:
-        - Key: kubernetes.io/role/elb
-          Value: "1"
-        - Key: Name
-          Value: EaSimpleStack/pontonEA Cluster/publicSubnetSubnet2
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/publicSubnetSubnet2/RouteTable
-  capstone21publicSubnetSubnet2RouteTableAssociationCD90D18C:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId:
-        Ref: capstone21publicSubnetSubnet2RouteTable904EC921
-      SubnetId:
-        Ref: capstone21publicSubnetSubnet2Subnet852C8FDE
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/publicSubnetSubnet2/RouteTableAssociation
-  capstone21publicSubnetSubnet2DefaultRouteC59E61C0:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId:
-        Ref: capstone21publicSubnetSubnet2RouteTable904EC921
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId:
-        Ref: capstone21IGWA3B2A0DA
-    DependsOn:
-      - capstone21VPCGWDA14A4BF
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/publicSubnetSubnet2/DefaultRoute
-  capstone21IGWA3B2A0DA:
-    Type: AWS::EC2::InternetGateway
-    Properties:
-      Tags:
-        - Key: Name
-          Value: EaSimpleStack/pontonEA Cluster
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/IGW
-  capstone21VPCGWDA14A4BF:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties:
-      VpcId:
-        Ref: capstone21VPC
-      InternetGatewayId:
-        Ref: capstone21IGWA3B2A0DA
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonEA Cluster/VPCGW
-  ingresssecuritygroup39BFA35C:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: EaSimpleStack/ingress-security-group
-      GroupName: IngressSecurityGroup
-      SecurityGroupEgress:
-        - CidrIp: 255.255.255.255/32
-          Description: Disallow all traffic
-          FromPort: 252
-          IpProtocol: icmp
-          ToPort: 86
-      SecurityGroupIngress:
-        - CidrIp: 213.208.220.4/16
-          Description: from 213.208.220.4/16:8889
-          FromPort: 8889
-          IpProtocol: tcp
-          ToPort: 8889
-        - CidrIp: 213.208.220.4/16
-          Description: from 213.208.220.4/16:22
-          FromPort: 22
-          IpProtocol: tcp
-          ToPort: 22
-      VpcId:
-        Ref: capstone21VPC
-    Metadata:
-      aws:cdk:path: EaSimpleStack/ingress-security-group/Resource
-  egressSecurityGroup7B1E76C7:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: EaSimpleStack/egressSecurityGroup
-      GroupName: EgressSecurityGroup
-      SecurityGroupEgress:
-        - CidrIp: 0.0.0.0/0
-          Description: Allow all outbound traffic by default
-          IpProtocol: "-1"
-      VpcId:
-        Ref: capstone21VPC
-    Metadata:
-      aws:cdk:path: EaSimpleStack/egressSecurityGroup/Resource
-  AdminRole38563C57:
+        - Key: EnvironmentName
+          Value: !Ref EnvironmentName
+
+
+# Kubernetes AdminRole
+  CapstoneAdminRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -323,9 +173,9 @@ Resources:
                     - Ref: AWS::AccountId
                     - :root
         Version: "2012-10-17"
-    Metadata:
-      aws:cdk:path: EaSimpleStack/AdminRole/Resource
-  pontoneasimpleRoleE8C26D59:
+
+# Kubernetes Role
+  Capstone21EKSRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -341,9 +191,8 @@ Resources:
             - - "arn:"
               - Ref: AWS::Partition
               - :iam::aws:policy/AmazonEKSClusterPolicy
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonea-simple/Role/Resource
-  pontoneasimpleControlPlaneSecurityGroupFCCCFA13:
+## Security Group for Cluster
+  controlPlaneSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: EKS Control Plane Security Group
@@ -353,443 +202,34 @@ Resources:
           IpProtocol: "-1"
       VpcId:
         Ref: capstone21VPC
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonea-simple/ControlPlaneSecurityGroup/Resource
-  pontoneasimpleCreationRole30A2A84B:
-    Type: AWS::IAM::Role
+
+## EKS Cluster
+  capstone21Cluster:
+    Type: 'AWS::EKS::Cluster'
     Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-          - Action: sts:AssumeRole
-            Effect: Allow
-            Principal:
-              AWS:
-                Fn::Join:
-                  - ""
-                  - - "arn:"
-                    - Ref: AWS::Partition
-                    - ":iam::"
-                    - Ref: AWS::AccountId
-                    - :root
-        Version: "2012-10-17"
-    DependsOn:
-      - capstone21IGWA3B2A0DA
-      - capstone21privateSubnetSubnet1DefaultRoute06A81048
-      - capstone21privateSubnetSubnet1RouteTableBAE9333A
-      - capstone21privateSubnetSubnet1RouteTableAssociationF1789C9F
-      - capstone21privateSubnetSubnet1SubnetF89F399A
-      - capstone21privateSubnetSubnet2DefaultRouteB589715E
-      - capstone21privateSubnetSubnet2RouteTableF4D2F54B
-      - capstone21privateSubnetSubnet2RouteTableAssociation57EABD42
-      - capstone21privateSubnetSubnet2SubnetD2D879FA
-      - capstone21publicSubnetSubnet1DefaultRoute0C8553CA
-      - capstone21publicSubnetSubnet1EIPCF5DEADD
-      - capstone21publicSubnetSubnet1NATGatewayFDB77AB9
-      - capstone21publicSubnetSubnet1RouteTable825BE106
-      - capstone21publicSubnetSubnet1RouteTableAssociation797A96E9
-      - capstone21publicSubnetSubnet1SubnetE9EC16D5
-      - capstone21publicSubnetSubnet2DefaultRouteC59E61C0
-      - capstone21publicSubnetSubnet2RouteTable904EC921
-      - capstone21publicSubnetSubnet2RouteTableAssociationCD90D18C
-      - capstone21publicSubnetSubnet2Subnet852C8FDE
-      - capstone21VPC
-      - capstone21VPCGWDA14A4BF
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonea-simple/Resource/CreationRole/Resource
-  pontoneasimpleCreationRoleDefaultPolicy05824D33:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyDocument:
-        Statement:
-          - Action: iam:PassRole
-            Effect: Allow
-            Resource:
-              Fn::GetAtt:
-                - pontoneasimpleRoleE8C26D59
-                - Arn
-          - Action:
-              - eks:CreateCluster
-              - eks:DescribeCluster
-              - eks:DescribeUpdate
-              - eks:DeleteCluster
-              - eks:UpdateClusterVersion
-              - eks:UpdateClusterConfig
-              - eks:CreateFargateProfile
-              - eks:TagResource
-              - eks:UntagResource
-            Effect: Allow
-            Resource:
-              - Fn::Join:
-                  - ""
-                  - - "arn:"
-                    - Ref: AWS::Partition
-                    - ":eks:"
-                    - Ref: AWS::Region
-                    - ":"
-                    - Ref: AWS::AccountId
-                    - :cluster/ea-simple
-              - Fn::Join:
-                  - ""
-                  - - "arn:"
-                    - Ref: AWS::Partition
-                    - ":eks:"
-                    - Ref: AWS::Region
-                    - ":"
-                    - Ref: AWS::AccountId
-                    - :cluster/ea-simple/*
-          - Action:
-              - eks:DescribeFargateProfile
-              - eks:DeleteFargateProfile
-            Effect: Allow
-            Resource:
-              Fn::Join:
-                - ""
-                - - "arn:"
-                  - Ref: AWS::Partition
-                  - ":eks:"
-                  - Ref: AWS::Region
-                  - ":"
-                  - Ref: AWS::AccountId
-                  - :fargateprofile/ea-simple/*
-          - Action:
-              - iam:GetRole
-              - iam:listAttachedRolePolicies
-            Effect: Allow
-            Resource: "*"
-          - Action: iam:CreateServiceLinkedRole
-            Effect: Allow
-            Resource: "*"
-          - Action:
-              - ec2:DescribeInstances
-              - ec2:DescribeNetworkInterfaces
-              - ec2:DescribeSecurityGroups
-              - ec2:DescribeSubnets
-              - ec2:DescribeRouteTables
-              - ec2:DescribeDhcpOptions
-              - ec2:DescribeVpcs
-            Effect: Allow
-            Resource: "*"
-        Version: "2012-10-17"
-      PolicyName: pontoneasimpleCreationRoleDefaultPolicy05824D33
-      Roles:
-        - Ref: pontoneasimpleCreationRole30A2A84B
-    DependsOn:
-      - capstone21IGWA3B2A0DA
-      - capstone21privateSubnetSubnet1DefaultRoute06A81048
-      - capstone21privateSubnetSubnet1RouteTableBAE9333A
-      - capstone21privateSubnetSubnet1RouteTableAssociationF1789C9F
-      - capstone21privateSubnetSubnet1SubnetF89F399A
-      - capstone21privateSubnetSubnet2DefaultRouteB589715E
-      - capstone21privateSubnetSubnet2RouteTableF4D2F54B
-      - capstone21privateSubnetSubnet2RouteTableAssociation57EABD42
-      - capstone21privateSubnetSubnet2SubnetD2D879FA
-      - capstone21publicSubnetSubnet1DefaultRoute0C8553CA
-      - capstone21publicSubnetSubnet1EIPCF5DEADD
-      - capstone21publicSubnetSubnet1NATGatewayFDB77AB9
-      - capstone21publicSubnetSubnet1RouteTable825BE106
-      - capstone21publicSubnetSubnet1RouteTableAssociation797A96E9
-      - capstone21publicSubnetSubnet1SubnetE9EC16D5
-      - capstone21publicSubnetSubnet2DefaultRouteC59E61C0
-      - capstone21publicSubnetSubnet2RouteTable904EC921
-      - capstone21publicSubnetSubnet2RouteTableAssociationCD90D18C
-      - capstone21publicSubnetSubnet2Subnet852C8FDE
-      - capstone21VPC
-      - capstone21VPCGWDA14A4BF
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonea-simple/Resource/CreationRole/DefaultPolicy/Resource
-  pontoneasimple5AB97110:
-    Type: Custom::AWSCDK-EKS-Cluster
-    Properties:
-      ServiceToken:
-        Fn::GetAtt:
-          - awscdkawseksClusterResourceProviderNestedStackawscdkawseksClusterResourceProviderNestedStackResource9827C454
-          - Outputs.EaSimpleStackawscdkawseksClusterResourceProviderframeworkonEvent49D2952FArn
-      Config:
-        name: ea-simple
-        version: "1.20"
-        roleArn:
-          Fn::GetAtt:
-            - pontoneasimpleRoleE8C26D59
-            - Arn
-        resourcesVpcConfig:
-          subnetIds:
-            - Ref: capstone21publicSubnetSubnet1SubnetE9EC16D5
-            - Ref: capstone21publicSubnetSubnet2Subnet852C8FDE
-            - Ref: capstone21privateSubnetSubnet1SubnetF89F399A
-            - Ref: capstone21privateSubnetSubnet2SubnetD2D879FA
-          securityGroupIds:
-            - Fn::GetAtt:
-                - pontoneasimpleControlPlaneSecurityGroupFCCCFA13
-                - GroupId
-          endpointPublicAccess: true
-          endpointPrivateAccess: true
-      AssumeRoleArn:
-        Fn::GetAtt:
-          - pontoneasimpleCreationRole30A2A84B
-          - Arn
-      AttributesRevision: 2
-    DependsOn:
-      - capstone21IGWA3B2A0DA
-      - capstone21privateSubnetSubnet1DefaultRoute06A81048
-      - capstone21privateSubnetSubnet1RouteTableBAE9333A
-      - capstone21privateSubnetSubnet1RouteTableAssociationF1789C9F
-      - capstone21privateSubnetSubnet1SubnetF89F399A
-      - capstone21privateSubnetSubnet2DefaultRouteB589715E
-      - capstone21privateSubnetSubnet2RouteTableF4D2F54B
-      - capstone21privateSubnetSubnet2RouteTableAssociation57EABD42
-      - capstone21privateSubnetSubnet2SubnetD2D879FA
-      - capstone21publicSubnetSubnet1DefaultRoute0C8553CA
-      - capstone21publicSubnetSubnet1EIPCF5DEADD
-      - capstone21publicSubnetSubnet1NATGatewayFDB77AB9
-      - capstone21publicSubnetSubnet1RouteTable825BE106
-      - capstone21publicSubnetSubnet1RouteTableAssociation797A96E9
-      - capstone21publicSubnetSubnet1SubnetE9EC16D5
-      - capstone21publicSubnetSubnet2DefaultRouteC59E61C0
-      - capstone21publicSubnetSubnet2RouteTable904EC921
-      - capstone21publicSubnetSubnet2RouteTableAssociationCD90D18C
-      - capstone21publicSubnetSubnet2Subnet852C8FDE
-      - capstone21VPC
-      - capstone21VPCGWDA14A4BF
-      - pontoneasimpleCreationRoleDefaultPolicy05824D33
-      - pontoneasimpleCreationRole30A2A84B
-    UpdateReplacePolicy: Delete
-    DeletionPolicy: Delete
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonea-simple/Resource/Resource/Default
-  pontoneasimpleKubectlReadyBarrier50496EDB:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Type: String
-      Value: aws:cdk:eks:kubectl-ready
-    DependsOn:
-      - pontoneasimpleCreationRoleDefaultPolicy05824D33
-      - pontoneasimpleCreationRole30A2A84B
-      - pontoneasimple5AB97110
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonea-simple/KubectlReadyBarrier
-  pontoneasimpleAwsAuthmanifestCB5B14C4:
-    Type: Custom::AWSCDK-EKS-KubernetesResource
-    Properties:
-      ServiceToken:
-        Fn::GetAtt:
-          - awscdkawseksKubectlProviderNestedStackawscdkawseksKubectlProviderNestedStackResourceA7AEBA6B
-          - Outputs.EaSimpleStackawscdkawseksKubectlProviderframeworkonEventA84BAE14Arn
-      Manifest:
-        Fn::Join:
-          - ""
-          - - '[{"apiVersion":"v1","kind":"ConfigMap","metadata":{"name":"aws-auth","namespace":"kube-system","labels":{"aws.cdk.eks/prune-c8e49f00f817d46d64a34501300a06a10651863243":"
-"}},"data":{"mapRoles":"[{\"rolearn\":\"'
-            - Fn::GetAtt:
-                - AdminRole38563C57
-                - Arn
-            - \",\"username\":\"
-            - Fn::GetAtt:
-                - AdminRole38563C57
-                - Arn
-            - \",\"groups\":[\"system:masters\"]},{\"rolearn\":\"
-            - Fn::GetAtt:
-                - pontoneasimpleNodegroupeaNodeGroupsNodeGroupRoleD749DE3A
-                - Arn
-            - \",\"username\":\"system:node:{{EC2PrivateDNSName}}\",\"groups\":[\"system:bootstrappers\",\"system:nodes\"]}]","mapUsers":"[]","mapAccounts":"[]"}}]
-      ClusterName:
-        Ref: pontoneasimple5AB97110
+      Name: capstone21Cluster
+      Version: '1.14'
       RoleArn:
-        Fn::GetAtt:
-          - pontoneasimpleCreationRole30A2A84B
-          - Arn
-      PruneLabel: aws.cdk.eks/prune-c8e49f00f817d46d64a34501300a06a10651863243
-      Overwrite: true
-    DependsOn:
-      - pontoneasimpleKubectlReadyBarrier50496EDB
-    UpdateReplacePolicy: Delete
-    DeletionPolicy: Delete
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonea-simple/AwsAuth/manifest/Resource/Default
-  pontoneasimpleNodegroupeaNodeGroupsNodeGroupRoleD749DE3A:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-          - Action: sts:AssumeRole
-            Effect: Allow
-            Principal:
-              Service:
-                Fn::Join:
-                  - ""
-                  - - ec2.
-                    - Ref: AWS::URLSuffix
-        Version: "2012-10-17"
-      ManagedPolicyArns:
-        - Fn::Join:
-            - ""
-            - - "arn:"
-              - Ref: AWS::Partition
-              - :iam::aws:policy/AmazonEKSWorkerNodePolicy
-        - Fn::Join:
-            - ""
-            - - "arn:"
-              - Ref: AWS::Partition
-              - :iam::aws:policy/AmazonEKS_CNI_Policy
-        - Fn::Join:
-            - ""
-            - - "arn:"
-              - Ref: AWS::Partition
-              - :iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonea-simple/NodegroupeaNodeGroups/NodeGroupRole/Resource
-  pontoneasimpleNodegroupeaNodeGroups7922801F:
-    Type: AWS::EKS::Nodegroup
-    Properties:
-      ClusterName:
-        Ref: pontoneasimple5AB97110
-      NodeRole:
-        Fn::GetAtt:
-          - pontoneasimpleNodegroupeaNodeGroupsNodeGroupRoleD749DE3A
-          - Arn
-      Subnets:
-        - Ref: capstone21privateSubnetSubnet1SubnetF89F399A
-        - Ref: capstone21privateSubnetSubnet2SubnetD2D879FA
-      AmiType: AL2_x86_64
-      ForceUpdateEnabled: true
-      InstanceTypes:
-        - t3.medium
-      ScalingConfig:
-        DesiredSize: 1
-        MaxSize: 2
-        MinSize: 1
-    Metadata:
-      aws:cdk:path: EaSimpleStack/pontonea-simple/NodegroupeaNodeGroups/Resource
-  awscdkawseksClusterResourceProviderNestedStackawscdkawseksClusterResourceProviderNestedStackResource9827C454:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL:
-        Fn::Join:
-          - ""
-          - - https://s3.
-            - Ref: AWS::Region
-            - "."
-            - Ref: AWS::URLSuffix
-            - /
-            - Ref: AssetParametersad0e522291260cb818b5adb3fb5487a5cd609e63700eb70c681a2873f85494cbS3Bucket02197A82
-            - /
-            - Fn::Select:
-                - 0
-                - Fn::Split:
-                    - "||"
-                    - Ref: AssetParametersad0e522291260cb818b5adb3fb5487a5cd609e63700eb70c681a2873f85494cbS3VersionKey033C6309
-            - Fn::Select:
-                - 1
-                - Fn::Split:
-                    - "||"
-                    - Ref: AssetParametersad0e522291260cb818b5adb3fb5487a5cd609e63700eb70c681a2873f85494cbS3VersionKey033C6309
-      Parameters:
-        referencetoEaSimpleStackpontoneasimpleCreationRoleD0ACDDA8Arn:
-          Fn::GetAtt:
-            - pontoneasimpleCreationRole30A2A84B
-            - Arn
-        referencetoEaSimpleStackAssetParameters50e10880d134a01b440991fc77d217f39f01c2d56945215ee9a3b81187c6f3b1S3Bucket65585F66Ref:
-          Ref: AssetParameters50e10880d134a01b440991fc77d217f39f01c2d56945215ee9a3b81187c6f3b1S3Bucket36C546E0
-        referencetoEaSimpleStackAssetParameters50e10880d134a01b440991fc77d217f39f01c2d56945215ee9a3b81187c6f3b1S3VersionKey61D31108Ref:
-          Ref: AssetParameters50e10880d134a01b440991fc77d217f39f01c2d56945215ee9a3b81187c6f3b1S3VersionKey85C003F9
-        referencetoEaSimpleStackAssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3Bucket2C475758Ref:
-          Ref: AssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3BucketEAC9DD43
-        referencetoEaSimpleStackAssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3VersionKey52ECDA8ERef:
-          Ref: AssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3VersionKeyDD9AE9E7
-    UpdateReplacePolicy: Delete
-    DeletionPolicy: Delete
-    Metadata:
-      aws:cdk:path: EaSimpleStack/@aws-cdk--aws-eks.ClusterResourceProvider.NestedStack/@aws-cdk--aws-eks.ClusterResourceProvider.NestedStackResource
-  awscdkawseksKubectlProviderNestedStackawscdkawseksKubectlProviderNestedStackResourceA7AEBA6B:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL:
-        Fn::Join:
-          - ""
-          - - https://s3.
-            - Ref: AWS::Region
-            - "."
-            - Ref: AWS::URLSuffix
-            - /
-            - Ref: AssetParametersdf0fc54f68c55233f152c10fc84ac3da20413b00d65b03011382d8b19f37bd09S3Bucket73E8D41C
-            - /
-            - Fn::Select:
-                - 0
-                - Fn::Split:
-                    - "||"
-                    - Ref: AssetParametersdf0fc54f68c55233f152c10fc84ac3da20413b00d65b03011382d8b19f37bd09S3VersionKeyF666E874
-            - Fn::Select:
-                - 1
-                - Fn::Split:
-                    - "||"
-                    - Ref: AssetParametersdf0fc54f68c55233f152c10fc84ac3da20413b00d65b03011382d8b19f37bd09S3VersionKeyF666E874
-      Parameters:
-        referencetoEaSimpleStackpontoneasimpleC06C5EABArn:
-          Fn::GetAtt:
-            - pontoneasimple5AB97110
-            - Arn
-        referencetoEaSimpleStackpontoneasimpleCreationRoleD0ACDDA8Arn:
-          Fn::GetAtt:
-            - pontoneasimpleCreationRole30A2A84B
-            - Arn
-        referencetoEaSimpleStackAssetParameters299e5262386e9f084fcd72906b8282f5c3cb1885c39d0912db1670b472873fb5S3BucketE09BA0D3Ref:
-          Ref: AssetParameters299e5262386e9f084fcd72906b8282f5c3cb1885c39d0912db1670b472873fb5S3BucketDDC37C6B
-        referencetoEaSimpleStackAssetParameters299e5262386e9f084fcd72906b8282f5c3cb1885c39d0912db1670b472873fb5S3VersionKeyD77A5562Ref:
-          Ref: AssetParameters299e5262386e9f084fcd72906b8282f5c3cb1885c39d0912db1670b472873fb5S3VersionKey1821F845
-        referencetoEaSimpleStackcapstone21privateSubnetSubnet1Subnet9D3F5812Ref:
-          Ref: capstone21privateSubnetSubnet1SubnetF89F399A
-        referencetoEaSimpleStackcapstone21privateSubnetSubnet2Subnet0FFE9F19Ref:
-          Ref: capstone21privateSubnetSubnet2SubnetD2D879FA
-        referencetoEaSimpleStackpontoneasimpleC06C5EABClusterSecurityGroupId:
-          Fn::GetAtt:
-            - pontoneasimple5AB97110
-            - ClusterSecurityGroupId
-        referencetoEaSimpleStackAssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68S3Bucket1E05A634Ref:
-          Ref: AssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68S3BucketAEADE8C7
-        referencetoEaSimpleStackAssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68S3VersionKey9CE0D6E5Ref:
-          Ref: AssetParameterse9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68S3VersionKeyE415415F
-        referencetoEaSimpleStackAssetParameterse3391b786690548f3ce35b0978307720abdf686dc3bcf6569583d1acca771a8fS3Bucket1E48292BRef:
-          Ref: AssetParameterse3391b786690548f3ce35b0978307720abdf686dc3bcf6569583d1acca771a8fS3Bucket15AF5408
-        referencetoEaSimpleStackAssetParameterse3391b786690548f3ce35b0978307720abdf686dc3bcf6569583d1acca771a8fS3VersionKey41F6752FRef:
-          Ref: AssetParameterse3391b786690548f3ce35b0978307720abdf686dc3bcf6569583d1acca771a8fS3VersionKeyF44D3302
-        referencetoEaSimpleStackAssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3Bucket2C475758Ref:
-          Ref: AssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3BucketEAC9DD43
-        referencetoEaSimpleStackAssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3VersionKey52ECDA8ERef:
-          Ref: AssetParametersc691172cdeefa2c91b5a2907f9d81118e47597634943344795f1a844192dd49cS3VersionKeyDD9AE9E7
-    UpdateReplacePolicy: Delete
-    DeletionPolicy: Delete
-    Metadata:
-      aws:cdk:path: EaSimpleStack/@aws-cdk--aws-eks.KubectlProvider.NestedStack/@aws-cdk--aws-eks.KubectlProvider.NestedStackResource
-  CDKMetadata:
-    Type: AWS::CDK::Metadata
-    Properties:
-      Analytics: v2:deflate64:H4sIAAAAAAAACk1Qy26DMBD8ltwdp/ShXotQFUVVUwRV7sZsGgewkb0bFCH+vTa0wGlnZq2Z8UY8il74w+ZNdG4ry2rXS2OB9zkKWbEMnCErgSVGO7QkkSXk0DTL4qzX+IuwJQxoMvAgFVY0gGAD8T6lQm
-  X0wEJgD/KR96dWht0pTVhq1U0g5FRomGxmlBlC+BZFDYu+aLFzRioRrOfHLKWiVnKxeD+kYRwF7n1IJ+6BHbTv5h+sJN/kj8Xov3FpQCPLQZJVeN9bQ+1YYS0MTImG95mZ6o0zNT59NJzQwKByvE9qf0J/jrhzMeGFfVAxFgD3KbQ6g0N2NCX8/O
-  fMZBgGpj3hV7e7Rc88euVPm6tTamtJo2qAZ9P8BaScDo3VAQAA
-Metadata:
-  aws:cdk:path: EaSimpleStack/CDKMetadata/Default
-Condition: CDKMetadataAvailable
-Outputs:
-  pontoneasimpleConfigCommandC6CE3360:
-    Value:
-      Fn::Join:
-        - ""
-        - - "aws eks update-kubeconfig --name "
-          - Ref: pontoneasimple5AB97110
-          - " --region "
-          - Ref: AWS::Region
-          - " --role-arn "
-          - Fn::GetAtt:
-              - AdminRole38563C57
-              - Arn
-  pontoneasimpleGetTokenCommand36FB7038:
-    Value:
-      Fn::Join:
-        - ""
-        - - "aws eks get-token --cluster-name "
-          - Ref: pontoneasimple5AB97110
-          - " --region "
-          - Ref: AWS::Region
-          - " --role-arn "
-          - Fn::GetAtt:
-              - AdminRole38563C57
-              - Arn
+        Ref: apstone21EKSRole
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          - controlPlaneSecurityGroup
+        SubnetIds:
+          - capstone21publicSubnet
+          - capstone21publicSubnet
+
+## EKS NodeGroup
+  capstone21NodeGroup:
+    EKSNodegroup:
+      Type: 'AWS::EKS::Nodegroup'
+      Properties:
+        AmiType: AL2_x86_64
+        ClusterName: capstone21
+        InstanceTypes: t3.micro
+        ScalingConfig:
+          MinSize: 1
+          DesiredSize: 1
+          MaxSize: 2
+        Subnets:
+          - capstone21publicSubnet
+          - capstone21publicSubnet
