@@ -108,6 +108,7 @@ jobs:
             echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
             kubectl version --short --client
             aws eks --region eu-central-1 update-kubeconfig --name ${CLUSTER_NAME}
+            kubectl apply -f deployment/deployment.yml
       - run:
           name: deploy app via kubectl
           command: |
