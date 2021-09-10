@@ -50,8 +50,7 @@ Resources:
           Value: PrivateSubnet
         - Key: EnvironmentName
           Value: !Ref EnvironmentName
-        - Key: kubernetes.io/role/elb
-          Value: "1"
+
 
   capstone21privateSubnetRouteTable:
     Type: AWS::EC2::RouteTable
@@ -63,8 +62,7 @@ Resources:
           Value: privateSubnetSubnet1RouteTable
         - Key: EnvironmentName
           Value: !Ref EnvironmentName
-        - Key: kubernetes.io/role/elb
-          Value: "1"
+
 
   capstone21privateSubnetRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -92,7 +90,7 @@ Resources:
         Ref: capstone21VPC
       AvailabilityZone:
         Fn::Select:
-          - 0
+          - 1
           - Fn::GetAZs: ""
       MapPublicIpOnLaunch: true
       Tags:
@@ -132,7 +130,7 @@ Resources:
 ## Elastic IP
   EIP1:
     Type: AWS::EC2::EIP
-    DependsOn: InternetVPCGatewayAttac
+    DependsOn: capstone21VPCAttac
     Properties:
       Domain: vpc
       Tags:
@@ -146,8 +144,7 @@ Resources:
     Properties:
       SubnetId:
         Ref: capstone21publicSubnet
-      AllocationId:
-        Ref: EIP1.AllocationId
+      AllocationId: !GetAtt EIP1.AllocationId
       Tags:
         - Key: kubernetes.io/role/elb
           Value: "1"
@@ -208,28 +205,38 @@ Resources:
     Type: 'AWS::EKS::Cluster'
     Properties:
       Name: capstone21Cluster
-      Version: '1.14'
-      RoleArn:
-        Ref: apstone21EKSRole
+      Version: '1.21'
+      RoleArn: arn:aws:iam::188794860952:role/eksDummyRole
       ResourcesVpcConfig:
         SecurityGroupIds:
-          - controlPlaneSecurityGroup
+          - !Ref controlPlaneSecurityGroup
         SubnetIds:
-          - capstone21publicSubnet
-          - capstone21publicSubnet
+          - !Ref capstone21publicSubnet
+          - !Ref capstone21privateSubnet
+    DependsOn:
+      - controlPlaneSecurityGroup
+      - capstone21publicSubnet
+      - capstone21privateSubnet
+
+
+
+
 
 ## EKS NodeGroup
   capstone21NodeGroup:
-    EKSNodegroup:
-      Type: 'AWS::EKS::Nodegroup'
-      Properties:
-        AmiType: AL2_x86_64
-        ClusterName: capstone21
-        InstanceTypes: t3.micro
-        ScalingConfig:
-          MinSize: 1
-          DesiredSize: 1
-          MaxSize: 2
-        Subnets:
-          - capstone21publicSubnet
-          - capstone21publicSubnet
+    Type: 'AWS::EKS::Nodegroup'
+    Properties:
+      AmiType: AL2_x86_64
+      ClusterName: capstone21Cluster
+      NodeRole: arn:aws:iam::188794860952:role/EKS_NodeRole
+      InstanceTypes:
+        - t3.micro
+      ScalingConfig:
+        MinSize: 1
+        DesiredSize: 2
+        MaxSize: 2
+      Subnets:
+        - !Ref capstone21publicSubnet
+        - !Ref capstone21privateSubnet
+    DependsOn:
+      - capstone21Cluster
