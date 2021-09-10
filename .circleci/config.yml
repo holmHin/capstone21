@@ -93,9 +93,21 @@ jobs:
             docker tag capstone21:latest 188794860952.dkr.ecr.eu-central-1.amazonaws.com/capstone:latest
             docker push 188794860952.dkr.ecr.eu-central-1.amazonaws.com/capstone:latest
 
-
-
-
+  # deploy the new image to the EKS Cluster using kube deployment
+  deploy-to-cluster:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: set kubctl config
+          command: |
+            aws eks --region eu-central-1 update-kubeconfig --name ${CLUSTER_NAME}
+      - run:
+          name: deploy app via kubectl
+          command: |
+            cd cloud
+            kubectl apply -f deployment/deployment.yml
 
 # Orchestrate or schedule a set of jobs
 workflows:
@@ -106,5 +118,6 @@ workflows:
       - lint-app
       - push-docker:
           requires: [build-app, test-app, lint-app]
+      - deploy-to-cluster
 
 
