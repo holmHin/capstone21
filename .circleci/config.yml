@@ -111,6 +111,8 @@ jobs:
       - run:
           name: deploy app via kubectl
           command: |
+            ls -l
+            echo ~/.bashrc
             echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
             cd cloud
             kubectl apply -f deployment/deployment.yml
