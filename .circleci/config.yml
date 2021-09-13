@@ -101,14 +101,7 @@ jobs:
       - run:
           name: check if cluster exists
           command: |
-            aws eks describe-cluster --name ${CLUSTER_NAME}
-            echo "Cluster is up!"
-      - run:
-          name: create cluster if not exists
-          when: on_fail
-          command: |
-            aws cloudformation create-stack --stack-name capstone21 --template-body file://cloud/infrastructure/infrastructure.yaml  --parameters file://cloud/infrastructure/parameters.json  --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" --region=eu-central-1
-            echo "cluster will spin up, this takes some time!"
+            bash cloud/infrastructure/infra_check.sh
   # deploy the new image to the EKS Cluster using kube deployment
   deploy-to-cluster:
     docker:
