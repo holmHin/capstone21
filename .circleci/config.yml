@@ -93,6 +93,22 @@ jobs:
             docker tag capstone21:latest 188794860952.dkr.ecr.eu-central-1.amazonaws.com/capstone:latest
             docker push 188794860952.dkr.ecr.eu-central-1.amazonaws.com/capstone:latest
 
+  check-cluster:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: check if cluster exists
+          command: |
+            aws eks describe-cluster --name ${CLUSTER_NAME}
+            echo "Cluster is up!"
+      - run:
+          name: create cluster if not exists
+          when: on_fail
+          command: |
+            cloudformation create-stack --stack-name capstone21 --template-body file://cloud/infrastructure/infrastructure.yaml  --parameters file://cloud/infrastructure/parameters.json  --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" --region=eu-central-1
+            echo "cluster will spin up, this takes some time!"
   # deploy the new image to the EKS Cluster using kube deployment
   deploy-to-cluster:
     docker:
@@ -108,8 +124,6 @@ jobs:
             echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
             kubectl version --short --client
             aws eks --region eu-central-1 update-kubeconfig --name ${CLUSTER_NAME}
-            kubectl config view
-            kubectl config current-context
             echo "Deploy applicatiopn to cluster!"
             kubectl apply -f deployment/deployment.yml --kubeconfig /root/.kube/config
 
@@ -122,7 +136,8 @@ workflows:
       #- lint-app
       #- push-docker:
       #    requires: [build-app, test-app, lint-app]
+      - check-cluster
       - deploy-to-cluster
-          # requires: [push-docker]
+          requires: [check-cluster]
 
 
