@@ -107,8 +107,9 @@ jobs:
             mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
             echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
             kubectl version --short --client
-            aws s3 ls
             aws eks --region eu-central-1 update-kubeconfig --name ${CLUSTER_NAME}
+            kubectl config view
+            kubectl kubectl config current-context
             echo "Deploy applicatiopn to cluster!"
             kubectl apply -f deployment/deployment.yml --kubeconfig /root/.kube/config
 
