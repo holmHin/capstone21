@@ -100,6 +100,7 @@ jobs:
       - checkout
       - run:
           name: check if cluster exists
+          # if cluster not exists it will create a new one, this is normally not required as we ase the cluster is there and just shows that it can also be created from circlCI!
           command: |
             bash cloud/infrastructure/infra_check.sh
   # deploy the new image to the EKS Cluster using kube deployment
@@ -123,8 +124,12 @@ jobs:
           name: deploy loadbalancer to deployment
           command: |
             mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
-            kubectl expose deployment capstone-deployment$pipeline.number  --type=LoadBalancer  --name=capstone-service-loadbalancer
+            kubectl expose deployment capstone-deployment$pipeline.number  --type=LoadBalancer  --name=capstone-service-loadbalancer-$pipeline.number
             kubectl get service
+  smoketest:
+
+  switch_deployment:
+
 # Orchestrate or schedule a set of jobs
 workflows:
   capstone:
