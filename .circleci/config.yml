@@ -118,14 +118,13 @@ jobs:
             kubectl version --short --client
             aws eks --region eu-central-1 update-kubeconfig --name ${CLUSTER_NAME}
             echo "Deploy applicatiopn to cluster!"
-            kubectl apply -f cloud/deployment/deployment.yaml --kubeconfig /root/.kube/config
+            sed 's/capstone-deployment/capstone-deployment${pipeline.number}/g' cloud/deployment/deployment.yaml > cloud/deployment/deployment_temp.yaml
+            kubectl apply -f cloud/deployment/deployment_temp.yaml --kubeconfig /root/.kube/config
       - run:
           name: deploy loadbalancer to deployment
-          command:
-            chmod +x ./kubectl
+          command: |
             mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
-            echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
-            kubectl expose deployment capstone-deployment  --type=LoadBalancer  --name=nginx-service-loadbalancer
+            kubectl expose deployment capstone-deployment${pipeline.number}  --type=LoadBalancer  --name=capstone-service-loadbalancer
             kubectl get service
 # Orchestrate or schedule a set of jobs
 workflows:
