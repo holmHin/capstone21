@@ -107,7 +107,7 @@ jobs:
           name: create cluster if not exists
           when: on_fail
           command: |
-            cloudformation create-stack --stack-name capstone21 --template-body file://cloud/infrastructure/infrastructure.yaml  --parameters file://cloud/infrastructure/parameters.json  --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" --region=eu-central-1
+            aws cloudformation create-stack --stack-name capstone21 --template-body file://cloud/infrastructure/infrastructure.yaml  --parameters file://cloud/infrastructure/parameters.json  --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" --region=eu-central-1
             echo "cluster will spin up, this takes some time!"
   # deploy the new image to the EKS Cluster using kube deployment
   deploy-to-cluster:
