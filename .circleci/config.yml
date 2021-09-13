@@ -108,8 +108,8 @@ jobs:
             echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
             kubectl version --short --client
             aws eks --region eu-central-1 update-kubeconfig --name ${CLUSTER_NAME}
-            echo "Deploy applicatiopn to kluster!"
-            kubectl apply -f deployment/deployment.yml
+            echo "Deploy applicatiopn to cluster!"
+            kubectl apply -f deployment/deployment.yml --kubeconfig /root/.kube/config
 
 # Orchestrate or schedule a set of jobs
 workflows:
