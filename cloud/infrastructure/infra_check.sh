@@ -1,4 +1,4 @@
-if aws eks describe-cluster --name ${CLUSTER_NAME} ; then
+if aws eks describe-cluster --name ${CLUSTER_NAME} > check; then
 	echo "Cluster exists!"
 else
 	echo "Cluster does not exist, check if cloudformation is in progress, this can take several minutes"
