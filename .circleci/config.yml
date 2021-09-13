@@ -137,7 +137,7 @@ workflows:
       #- push-docker:
       #    requires: [build-app, test-app, lint-app]
       - check-cluster
-      - deploy-to-cluster
+      - deploy-to-cluster:
           requires: [check-cluster]
 
 
