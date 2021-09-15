@@ -146,15 +146,22 @@ jobs:
           name: Frontend smoke test.
           command: |
             URL=${curl -H "token: a9a786e3-df62-453d-8bd5-36b0d69f8c0e" --request GET https://api.memstash.io/values/url}
-                if curl -s ${URL} | grep "Welcome"
+                if curl -s ${URL} | grep "Capstone"
                   then
                 return 0
                   else
                 return 1
                 fi
 
-
-
+  switch-url:
+    docker:
+      - image: amazon/aws-cli
+      steps:
+        - checkout
+        - run: |
+            URL=${curl -H "token: a9a786e3-df62-453d-8bd5-36b0d69f8c0e" --request GET https://api.memstash.io/values/url}
+            echo "switching URL to: ${URL}"
+            aws cloudformation create-stack --stack-name capstone21-cf --template-body file://infrastructure/cloudFront.yaml --parameters ParameterKey=LoadBalancerURL,ParameterValue=a42bb2fbb96d5439b863b8848d31835f-543710054.eu-central-1.elb.amazonaws.com
 
 
  # switch_deployment:
