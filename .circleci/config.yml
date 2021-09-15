@@ -194,6 +194,7 @@ workflows:
       - push-docker:
           requires: [build-app, test-app, lint-app]
       - check-cluster
+      -   requires: [push-docker]
       - deploy-to-cluster:
           requires: [check-cluster]
       - smoketest:
