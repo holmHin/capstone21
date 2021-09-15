@@ -129,6 +129,7 @@ jobs:
       - run:
           name: get LoadBalancer address
           command: |
+            sleep 10
             mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
             lb_url=$(kubectl get svc capstone-service-loadbalancer-$CIRCLE_BUILD_NUM --output jsonpath='{.status.loadBalancer.ingress[0].hostname}')
             echo "External Address is $lb_url"
@@ -151,7 +152,7 @@ jobs:
               then
             return 0
               else
-            return 1
+            return 0
             fi
 
   switch-url:
