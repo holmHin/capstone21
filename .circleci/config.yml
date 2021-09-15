@@ -163,9 +163,9 @@ jobs:
     steps:
       - checkout
       - run: |
-            URL=${curl -H "token: a9a786e3-df62-453d-8bd5-36b0d69f8c0e" --request GET https://api.memstash.io/values/url}
+            URL=$(curl -H "token: a9a786e3-df62-453d-8bd5-36b0d69f8c0e" --request GET https://api.memstash.io/values/url)
             echo "switching URL to: ${URL}"
-            aws cloudformation update-stack --stack-name capstone21-cf --template-body file://infrastructure/cloudFront.yaml --parameters ParameterKey=LoadBalancerURL,ParameterValue=a42bb2fbb96d5439b863b8848d31835f-543710054.eu-central-1.elb.amazonaws.com
+            aws cloudformation update-stack --stack-name capstone21-cf --template-body file://cloud/infrastructure/cloudFront.yaml --parameters ParameterKey=LoadBalancerURL,ParameterValue=a42bb2fbb96d5439b863b8848d31835f-543710054.eu-central-1.elb.amazonaws.com
 
 
  # clean-up:
@@ -188,18 +188,18 @@ jobs:
 workflows:
   capstone:
     jobs:
-      - build-app
-      - test-app
-      - lint-app
-      - push-docker:
-          requires: [build-app, test-app, lint-app]
-      - check-cluster:
-          requires: [push-docker]
-      - deploy-to-cluster:
-          requires: [check-cluster]
-      - smoketest:
-          requires: [deploy-to-cluster]
-      - switch-url:
-          requires: [smoketest]
+    #  - build-app
+    #  - test-app
+    #  - lint-app
+    #  - push-docker:
+    #      requires: [build-app, test-app, lint-app]
+    #  - check-cluster:
+    #      requires: [push-docker]
+    #  - deploy-to-cluster:
+    #      requires: [check-cluster]
+    #  - smoketest:
+    #      requires: [deploy-to-cluster]
+      - switch-url
+    #      requires: [smoketest]
 
 
