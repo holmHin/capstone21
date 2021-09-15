@@ -129,7 +129,7 @@ jobs:
       - run:
           name: get LoadBalancer address
           command: |
-            sleep 30
+            sleep 60
             mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
             lb_url=$(kubectl get svc capstone-service-loadbalancer-$CIRCLE_BUILD_NUM --output jsonpath='{.status.loadBalancer.ingress[0].hostname}')
             echo "External Address is $lb_url"
@@ -150,8 +150,10 @@ jobs:
             URL=$(curl -H "token: a9a786e3-df62-453d-8bd5-36b0d69f8c0e" --request GET https://api.memstash.io/values/url)
             if curl -s ${URL} | grep "Capstone"
               then
+            echo "Okay"
             return 0
               else
+            Echo "URL Not Reachable!"
             return 0
             fi
 
