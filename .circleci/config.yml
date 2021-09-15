@@ -145,6 +145,7 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
+            sleep 20
             URL=$(curl -H "token: a9a786e3-df62-453d-8bd5-36b0d69f8c0e" --request GET https://api.memstash.io/values/url)
             if curl -s ${URL} | grep "Capstone"
               then
