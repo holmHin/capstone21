@@ -144,7 +144,7 @@ jobs:
           command:
             apk add --update curl
       - run:
-          name: Frontend smoke test.
+          name: Smoke test.
           command: |
             sleep 20
             URL=$(curl -H "token: a9a786e3-df62-453d-8bd5-36b0d69f8c0e" --request GET https://api.memstash.io/values/url)
@@ -153,7 +153,7 @@ jobs:
             echo "Okay"
             return 0
               else
-            Echo "URL Not Reachable!"
+            echo "URL Not Reachable!"
             return 0
             fi
 
@@ -188,11 +188,11 @@ jobs:
 workflows:
   capstone:
     jobs:
-      #- build-app
-      #- test-app
-      #- lint-app
-      #- push-docker:
-      #    requires: [build-app, test-app, lint-app]
+      - build-app
+      - test-app
+      - lint-app
+      - push-docker:
+          requires: [build-app, test-app, lint-app]
       - check-cluster
       - deploy-to-cluster:
           requires: [check-cluster]
