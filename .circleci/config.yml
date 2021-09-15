@@ -126,7 +126,36 @@ jobs:
             mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
             kubectl expose deployment capstone-deployment$CIRCLE_BUILD_NUM  --type=LoadBalancer  --name=capstone-service-loadbalancer-$CIRCLE_BUILD_NUM
             kubectl get service
- # smoketest:
+      - run:
+          name: get LoadBalancer address
+          command: |
+            mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
+            lb_url=$(kubectl get svc capstone-service-loadbalancer-$CIRCLE_BUILD_NUM --output jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+            echo "External Address is $lb_url"
+            curl -H "Content-Type: text/plain" -H "token: a9a786e3-df62-453d-8bd5-36b0d69f8c0e" --request PUT --data $lb_url https://api.memstash.io/values/url
+
+  smoketest:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - run:
+          name: Install dependencies
+          command:
+            apk add --update curl
+      - run:
+          name: Frontend smoke test.
+          command: |
+            URL=${curl -H "token: a9a786e3-df62-453d-8bd5-36b0d69f8c0e" --request GET https://api.memstash.io/values/url}
+                if curl -s ${URL} | grep "Welcome"
+                  then
+                return 0
+                  else
+                return 1
+                fi
+
+
+
+
 
  # switch_deployment:
 

@@ -1,0 +1,46 @@
+Description: Capstone CLoudFront
+Parameters:
+  LoadBalancerURL:
+    Description: URL To LoadBalancer.
+    Type: String
+
+
+
+Resources:
+
+  CloudFrontOriginAccessIdentity:
+    Type: "AWS::CloudFront::CloudFrontOriginAccessIdentity"
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: Access to K8s Loadbalancer
+
+  WebpageCDN:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+          - DomainName: !Sub ${LoadBalancerURL}
+            Id: webaccess
+            CustomOriginConfig:
+              OriginProtocolPolicy: http-only
+              HTTPPort: 80
+        Enabled: True
+        DefaultRootObject: index.html
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - 'GET'
+            - 'HEAD'
+          CachedMethods:
+            - 'GET'
+            - 'HEAD'
+          TargetOriginId: webaccess
+          ForwardedValues:
+            QueryString: False
+          ViewerProtocolPolicy: allow-all
+
+Outputs:
+  LBUrl:
+    Value: !Sub ${LoadBalancerURL}
+    Description: URL for website hosted on S3
+    Export:
+      Name: LoadBalancerURL
